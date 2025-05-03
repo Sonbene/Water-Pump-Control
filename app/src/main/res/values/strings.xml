@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Water Pump Control</string>
+    <string name="navigation_drawer_open">Mở Menu</string>
+    <string name="navigation_drawer_close">Đóng Menu</string>
+    <string-array name="pump_mode_options">
+        <item>Auto</item>
+        <item>Đầy</item>
+        <item>Dừng</item>
+    </string-array>
+    <string-array name="recurrence_options">
+        <item>Một lần</item>
+        <item>Hàng ngày</item>
+        <item>Hàng tuần</item>
+        <item>Hàng tháng</item>
+    </string-array>
+    <string name="drawer_open">Mở menu</string>
+    <string name="drawer_close">Đóng menu</string>
+
+
+</resources>

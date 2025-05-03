@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Main content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Toolbar -->
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_menu"
+            android:background="@drawable/toolbar_background"
+            app:title="Cài lịch bơm"
+            app:titleTextColor="@android:color/white"/>
+
+        <!-- Nội dung cuộn -->
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="?attr/dividerVertical"
+                android:dividerPadding="8dp">
+
+                <!-- Chọn chế độ bơm -->
+                <TextView
+                    style="?attr/textAppearanceBody1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chế độ bơm" />
+
+                <Spinner
+                    android:id="@+id/spinnerPumpMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/pump_mode_options"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- Chọn lặp lại -->
+                <TextView
+                    style="?attr/textAppearanceBody1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lặp lại" />
+
+                <Spinner
+                    android:id="@+id/spinnerRecurrence"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/recurrence_options"
+                    android:layout_marginBottom="16dp"/>
+
+                <!-- Ngày (Một lần) -->
+                <LinearLayout
+                    android:id="@+id/layoutDate"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        style="?attr/textAppearanceBody1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Ngày" />
+
+                    <Button
+                        android:id="@+id/btnDate"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="--/--/----" />
+                </LinearLayout>
+
+                <!-- Ngày trong tuần -->
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipDaysOfWeek"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginBottom="16dp"
+                    app:singleSelection="false"
+                    app:selectionRequired="false" />
+
+
+                <!-- Ngày trong tháng -->
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipDaysOfMonth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginBottom="16dp"
+                    app:singleSelection="false">
+                    <!-- generate Chips 1..31 trong code -->
+                </com.google.android.material.chip.ChipGroup>
+
+                <!-- Giờ bắt đầu -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        style="?attr/textAppearanceBody1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Thời gian" />
+
+                    <Button
+                        android:id="@+id/btnStartTime"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:text="--:--" />
+                </LinearLayout>
+
+                <!-- Nút lưu -->
+                <Button
+                    android:id="@+id/btnSaveSchedule"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Lưu lịch"
+                    android:layout_marginBottom="24dp"/>
+
+                <!-- PHẦN LỊCH ĐÃ CÀI -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:layout_marginBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            style="?attr/textAppearanceSubtitle1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lịch đã cài" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvSchedules"
+                            android:layout_width="match_parent"
+                            android:layout_height="200dp"
+                            android:layout_marginTop="8dp"
+                            android:nestedScrollingEnabled="true" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/navigation_menu"/>
+</androidx.drawerlayout.widget.DrawerLayout>
