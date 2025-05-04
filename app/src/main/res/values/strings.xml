@@ -15,6 +15,9 @@
     </string-array>
     <string name="drawer_open">Mở menu</string>
     <string name="drawer_close">Đóng menu</string>
+    <string name="open_drawer">Mở menu điều hướng</string>
+    <string name="close_drawer">Đóng menu điều hướng</string>
+
 
 
 </resources>

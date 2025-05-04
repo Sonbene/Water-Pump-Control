@@ -2,6 +2,7 @@ package com.example.waterpumpcontrol;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -236,7 +237,28 @@ public class ScheduleActivity extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.nav_control) {
+            Intent intent = new Intent(this, controlActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.nav_dashboard) {
+            Intent intent = new Intent(this, DashBoardActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.nav_alerts) {
+            Intent intent = new Intent(this, AlertsActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.nav_reports) {
+            Intent intent = new Intent(this, ReportsActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.nav_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        }
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+
     }
 }

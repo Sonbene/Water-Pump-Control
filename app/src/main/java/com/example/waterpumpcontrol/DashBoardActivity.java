@@ -257,8 +257,21 @@ public class DashBoardActivity extends AppCompatActivity
         if (item.getItemId() == R.id.nav_control) {
             Intent intent = new Intent(this, controlActivity.class);
             startActivity(intent);
-        } else if (item.getItemId() == R.id.nav_schedule) {
+        }
+        else if (item.getItemId() == R.id.nav_schedule) {
             Intent intent = new Intent(this, ScheduleActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.nav_alerts) {
+            Intent intent = new Intent(this, AlertsActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.nav_reports) {
+            Intent intent = new Intent(this, ReportsActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.nav_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         }
         drawerLayout.closeDrawer(GravityCompat.START);

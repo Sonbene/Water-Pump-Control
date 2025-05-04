@@ -58,23 +58,18 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_schedule) {
             startActivity(new Intent(this, ScheduleActivity.class));
-
-        } else if (id == R.id.nav_alerts) {
-            //startActivity(new Intent(this, AlertsActivity.class));
-
-        } else if (id == R.id.nav_reports) {
-            //startActivity(new Intent(this, ReportsActivity.class));
-
-        } else if (id == R.id.nav_settings) {
-            //startActivity(new Intent(this, SettingsActivity.class));
-
-        } else if (id == R.id.nav_help) {
-            //startActivity(new Intent(this, HelpActivity.class));
-
-        } else if (id == R.id.nav_logout) {
-//            Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
-//            startActivity(new Intent(this, LoginActivity.class));
-//            finish();
+        }
+        else if (item.getItemId() == R.id.nav_alerts) {
+            Intent intent = new Intent(this, AlertsActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.nav_reports) {
+            Intent intent = new Intent(this, ReportsActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.nav_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         }
 
         drawerLayout.closeDrawer(GravityCompat.START);

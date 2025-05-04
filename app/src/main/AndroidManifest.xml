@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name=".MyApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -29,6 +30,9 @@
         <activity android:name=".DashBoardActivity" android:exported="false" />
         <activity android:name=".controlActivity" android:exported="false" />
         <activity android:name=".ScheduleActivity" android:exported="false" />
+        <activity android:name=".AlertsActivity" android:exported="false" />
+        <activity android:name=".ReportsActivity" android:exported="false" />
+        <activity android:name=".SettingsActivity" android:exported="false" />
 
     </application>
 

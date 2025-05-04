@@ -1,15 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="12dp"
-    android:orientation="vertical">
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:strokeColor="?attr/colorOnSurfaceVariant"
+    app:strokeWidth="1dp">
 
-    <TextView
-        android:id="@+id/tvAlertText"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Nội dung cảnh báo"
-        style="?attr/textAppearanceBody1" />
+        android:padding="12dp">
 
-</LinearLayout>
+        <!-- Icon mức độ -->
+        <ImageView
+            android:id="@+id/ivSeverity"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:tint="?attr/colorError" />
+
+        <!-- Thời gian -->
+        <TextView
+            android:id="@+id/tvTime"
+            style="?attr/textAppearanceCaption"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="12:34 01/01"
+            app:layout_constraintBaseline_toBaselineOf="@id/ivSeverity"
+            app:layout_constraintStart_toEndOf="@id/ivSeverity"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="8dp"/>
+
+        <!-- Nội dung cảnh báo -->
+        <TextView
+            android:id="@+id/tvMessage"
+            style="?attr/textAppearanceBody2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Mức nước vượt ngưỡng an toàn!"
+            app:layout_constraintTop_toBottomOf="@id/ivSeverity"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnAcknowledge"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- Nút xác nhận 1 cảnh báo -->
+        <Button
+            android:id="@+id/btnAcknowledge"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OK"
+            app:layout_constraintBaseline_toBaselineOf="@id/tvMessage"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
