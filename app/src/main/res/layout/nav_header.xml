@@ -23,14 +23,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="Profile"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@mipmap/logo" />
 
     <TextView
         android:id="@+id/tvAdminName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Admin Name"
+        android:text="Nguyễn Anh Sơn"
         android:textColor="@android:color/white"
         android:textSize="18sp"/>
 
@@ -38,7 +38,7 @@
         android:id="@+id/tvAdminEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="admin@example.com"
+        android:text="Son010@gmail.com"
         android:textColor="@android:color/white"
         android:textSize="14sp"/>
 </LinearLayout>

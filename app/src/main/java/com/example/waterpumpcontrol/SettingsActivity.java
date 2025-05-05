@@ -321,6 +321,10 @@ public class SettingsActivity extends AppCompatActivity
         else if (id == R.id.nav_reports) intent = new Intent(this, ReportsActivity.class);
         else if (id == R.id.nav_settings) return true;
         else if (id == R.id.nav_logout) { performLogout(); return true; }
+        else if (item.getItemId() == R.id.nav_logout) {
+            intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
         if (intent != null) { startActivity(intent); finish(); }
         return true;
     }

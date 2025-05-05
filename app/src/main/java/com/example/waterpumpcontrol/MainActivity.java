@@ -71,6 +71,10 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         }
+        else if (item.getItemId() == R.id.nav_logout) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

@@ -1,23 +1,34 @@
-// Schedule.java
 package com.example.waterpumpcontrol;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Schedule {
+    private Integer id;
     private String pumpMode;
     private String recurrence;
     private String date;
-    private List<Integer> daysOfWeek;
-    private List<Integer> daysOfMonth;
+    private List<Integer> daysOfWeek = new ArrayList<>();
+    private List<Integer> daysOfMonth = new ArrayList<>();
     private String startTime;
     private String endTime;
     private boolean active;
 
-    // … các constructor nếu có …
+    public Schedule() {
+        // Ensure lists are always initialized
+        this.daysOfWeek = new ArrayList<>();
+        this.daysOfMonth = new ArrayList<>();
+    }
 
-    // +++++++++++++++++++++++++++++++
     // Getter / Setter
+    public Integer getId() {
+        return id;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public String getPumpMode() {
         return pumpMode;
     }
@@ -73,7 +84,6 @@ public class Schedule {
     public void setActive(boolean active) {
         this.active = active;
     }
-    // +++++++++++++++++++++++++++++++
 
-    // Phương thức kiểm tra xung đột và nextRun() như trước…
+    // You can add conflict checking or nextRun() logic here
 }
