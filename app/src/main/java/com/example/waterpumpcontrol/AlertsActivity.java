@@ -2,6 +2,7 @@ package com.example.waterpumpcontrol;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Button;
@@ -32,6 +33,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AlertsActivity extends AppCompatActivity {
+
+    private WaterPumpManager waterPumpManager;
     private DrawerLayout drawer;
     private RecyclerView rvAlerts;
     private SwipeRefreshLayout swipeRefresh;
@@ -95,6 +98,28 @@ public class AlertsActivity extends AppCompatActivity {
         // Set up chip filter listener
         ChipGroup chipSeverityFilter = findViewById(R.id.chipSeverityFilter);
         chipSeverityFilter.setOnCheckedChangeListener((group, checkedId) -> loadAlerts());
+
+        waterPumpManager = WaterPumpManager.getInstance();
+
+        waterPumpManager.checkPostNotificationPermission(this);
+        waterPumpManager.initMqtt(this);
+        waterPumpManager.createNotificationChannel(this);
+
+
+        Handler handler1 = new Handler();
+        Runnable checkMqttConnectionTask = new Runnable() {
+            @Override
+            public void run() {
+                // Gọi hàm checkMqttConnection mỗi 10 giây
+                waterPumpManager.checkMqttConnection(AlertsActivity.this);
+
+                // Lặp lại sau 10 giây (10,000ms)
+                handler1.postDelayed(this, 10000); // Delay 10s
+            }
+        };
+
+        // Bắt đầu kiểm tra ngay lập tức khi ứng dụng chạy
+        handler1.post(checkMqttConnectionTask);
     }
 
     private void loadAlerts() {
@@ -245,6 +270,9 @@ public class AlertsActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.nav_logout) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
+        } else if (item.getItemId() == R.id.nav_help) {
+            Intent intent = new Intent(this, HelpActivity.class);
+            startActivity(intent);
         }
         return true;
     }
@@ -257,4 +285,12 @@ public class AlertsActivity extends AppCompatActivity {
             super.onBackPressed();
         }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Kiểm tra kết nối MQTT khi ứng dụng quay lại
+        waterPumpManager.checkMqttConnection(this);
+    }
+
 }

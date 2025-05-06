@@ -13,6 +13,8 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
 
+        WaterPumpManager.getInstance();  // Khởi tạo singleton của WaterPumpManager
+
         SharedPreferences prefs = getSharedPreferences("waterpump_prefs", MODE_PRIVATE);
 
         // Áp dụng theme đã lưu

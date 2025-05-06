@@ -3,6 +3,7 @@ package com.example.waterpumpcontrol;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,6 +61,11 @@ public class DashBoardActivity extends AppCompatActivity
     private boolean alertedFull = false;
     private boolean alertedEmpty = false;
 
+    private float lastLevel = 0f;
+
+    private Handler Update_Handler = new Handler();
+
+    private WaterPumpManager waterPumpManager;
 
 
     @Override
@@ -92,6 +98,7 @@ public class DashBoardActivity extends AppCompatActivity
         chartHistory = findViewById(R.id.chartControl);
         dataSetLevel   = new LineDataSet(new ArrayList<>(), "Mực nước (cm)");
         dataSetControl = new LineDataSet(new ArrayList<>(), "DutyCycle(%)");
+
 
 // sau khi tạo dataSetLevel, dataSetControl nhưng trước khi setData(...)
         ValueFormatter lastPointFormatterLevel = new ValueFormatter() {
@@ -128,11 +135,11 @@ public class DashBoardActivity extends AppCompatActivity
 
         // màu và kích thước text
         dataSetLevel.setColor(Color.BLUE);
-        dataSetLevel.setValueTextColor(Color.MAGENTA);
+        dataSetLevel.setValueTextColor(Color.BLUE);
         dataSetLevel.setValueTextSize(10f);
 
         dataSetControl.setColor(Color.RED);
-        dataSetControl.setValueTextColor(Color.WHITE);
+        dataSetControl.setValueTextColor(Color.RED);
         dataSetControl.setValueTextSize(10f);
 
         // Description
@@ -170,86 +177,138 @@ public class DashBoardActivity extends AppCompatActivity
 
 
         // MQTT setup
-        mqtt = new MqttHandler();
-        mqtt.connect(this, BROKER_URI, MQTT_USER, MQTT_PASS);
+//        mqtt = new MqttHandler();
+//        mqtt.connect(this, BROKER_URI, MQTT_USER, MQTT_PASS);
+//
+//        mqtt.setCallback(new MqttCallback() {
+//            @Override
+//            public void connectionLost(Throwable cause) {}
+//
+//            @Override
+//            public void messageArrived(String topic, MqttMessage message) {
+//                handleMessageArrived(topic, message);
+//            }
+//
+//            @Override
+//            public void deliveryComplete(IMqttDeliveryToken token) {
+//                // Optional, if you need to handle delivery completion
+//            }
+//        });
+//
+//        mqtt.subscribe(TOPIC_LEVEL);
 
-        mqtt.setCallback(new MqttCallback() {
+        waterPumpManager = WaterPumpManager.getInstance();
+
+        waterPumpManager.checkPostNotificationPermission(this);
+        waterPumpManager.initMqtt(this);
+        waterPumpManager.createNotificationChannel(this);
+
+        startUpdatingUi();
+
+
+        Handler handler1 = new Handler();
+        Runnable checkMqttConnectionTask = new Runnable() {
             @Override
-            public void connectionLost(Throwable cause) {
-                runOnUiThread(() ->
-                        Toast.makeText(DashBoardActivity.this,
-                                "MQTT connection lost", Toast.LENGTH_SHORT).show()
-                );
+            public void run() {
+                // Gọi hàm checkMqttConnection mỗi 10 giây
+                waterPumpManager.checkMqttConnection(DashBoardActivity.this);
+
+                // Lặp lại sau 10 giây (10,000ms)
+                handler1.postDelayed(this, 10000); // Delay 10s
             }
+        };
 
-            @Override
-            public void messageArrived(String topic, MqttMessage message) {
-                if (TOPIC_LEVEL.equals(topic)) {
-                    String payload = new String(message.getPayload()).trim();
-                    String[] parts = payload.split("\\s+");
-                    if (parts.length != 2) return;
-                    try {
-                        float x = Float.parseFloat(parts[0].replace(',', '.'));
-                        int y = Integer.parseInt(parts[1]);
-
-                        runOnUiThread(() -> {
-                            tvCurrentWaterLevel.setText(x + " cm");
-                            float pct = y / 255f * 100f;
-                            tvPumpStatus.setText(String.format(Locale.US, "%.2f%%", pct));
-
-                            // new: alerts when too high / too low
-                            if (x > 18f) {
-                                if (!alertedFull) {
-                                    // xóa hết alert cũ
-                                    alertsAdapter.clearAlerts();
-                                    // thêm alert mới
-                                    alertsAdapter.addAlert("⚠️ Bể đầy: " + x + " cm");
-                                    alertedFull = true;
-                                    alertedEmpty = false;
-                                }
-                            } else if (x < 2f) {
-                                if (!alertedEmpty) {
-                                    alertsAdapter.clearAlerts();
-                                    alertsAdapter.addAlert("⚠️ Bể cạn: " + x + " cm");
-                                    alertedEmpty = true;
-                                    alertedFull = false;
-                                }
-                            } else {
-                                // reset flag khi nước về vùng an toàn
-                                alertsAdapter.clearAlerts();
-                                alertedFull = false;
-                                alertedEmpty = false;
-                            }
-
-                            dataSetLevel.addEntry(new Entry(timeIndex, x));
-                            dataSetControl.addEntry(new Entry(timeIndex, pct));
-                            if (dataSetLevel.getEntryCount() > 20) {
-                                dataSetLevel.removeFirst();
-                                dataSetControl.removeFirst();
-                            }
-                            lineData.notifyDataChanged();
-                            chartHistory.notifyDataSetChanged();
-                            chartHistory.invalidate();
-                            timeIndex++;
-                        });
-                    } catch (NumberFormatException ignored) {
-                    }
-                }
-                else{
-
-                }
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) { }
-        });
-
-        mqtt.subscribe(TOPIC_LEVEL);
+        // Bắt đầu kiểm tra ngay lập tức khi ứng dụng chạy
+        handler1.post(checkMqttConnectionTask);
     }
 
-    // Khi cần điều khiển bơm
-    private void controlPump(int pwm) {
-        mqtt.publish(TOPIC_CONTROL, String.valueOf(pwm));
+    private void handleMessageArrived(String topic, MqttMessage message) {
+        if (TOPIC_LEVEL.equals(topic)) {
+            String payload = new String(message.getPayload()).trim();
+            String[] parts = payload.split("\\s+");
+
+            if (parts.length != 2) return;
+
+            try {
+                float x = Float.parseFloat(parts[0].replace(',', '.'));
+                int y = Integer.parseInt(parts[1]);
+
+                lastLevel = x;
+
+                updateUiWithData(x, y);
+                updateAlerts(x);
+                updateChartData(x, y);
+
+            } catch (NumberFormatException ignored) {
+            }
+        }
+    }
+
+    private void startUpdatingUi() {
+        // Định nghĩa Runnable sẽ gọi updateUi mỗi 1 giây
+        Runnable updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // Cập nhật UI
+                updateUiWithData(waterPumpManager.getWaterLevel(), waterPumpManager.getWaterPWM());
+                updateAlerts(waterPumpManager.getWaterLevel());
+                updateChartData(waterPumpManager.getWaterLevel(), waterPumpManager.getWaterPWM());
+                // Lập lại Runnable để chạy sau 1 giây nữa
+                Update_Handler.postDelayed(this, 500);
+            }
+        };
+
+        // Bắt đầu thực thi runnable ngay lập tức
+        Update_Handler.post(updateRunnable);
+    }
+
+    private void updateUiWithData(float x, int y) {
+        runOnUiThread(() -> {
+            tvCurrentWaterLevel.setText(x + " cm");
+            float pct = y / 255f * 100f;
+            tvPumpStatus.setText(String.format(Locale.US, "%.2f%%", pct));
+        });
+    }
+
+    private void updateAlerts(float x) {
+        runOnUiThread(() -> {
+            if (x > 18f) {
+                if (!alertedFull) {
+                    alertsAdapter.clearAlerts();
+                    alertsAdapter.addAlert("⚠️ Bể đầy: " + x + " cm");
+                    alertedFull = true;
+                    alertedEmpty = false;
+                }
+            } else if (x < 2f) {
+                if (!alertedEmpty) {
+                    alertsAdapter.clearAlerts();
+                    alertsAdapter.addAlert("⚠️ Bể cạn: " + x + " cm");
+                    alertedEmpty = true;
+                    alertedFull = false;
+                }
+            } else {
+                alertsAdapter.clearAlerts();
+                alertedFull = false;
+                alertedEmpty = false;
+            }
+        });
+    }
+
+    private void updateChartData(float x, int y) {
+        runOnUiThread(() -> {
+            dataSetLevel.addEntry(new Entry(timeIndex, x));
+            dataSetControl.addEntry(new Entry(timeIndex, y / 255f * 100f));
+
+            if (dataSetLevel.getEntryCount() > 20) {
+                dataSetLevel.removeFirst();
+                dataSetControl.removeFirst();
+            }
+
+            lineData.notifyDataChanged();
+            chartHistory.notifyDataSetChanged();
+            chartHistory.invalidate();
+            timeIndex++;
+        });
     }
 
     @Override
@@ -278,6 +337,10 @@ public class DashBoardActivity extends AppCompatActivity
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
+        else if (item.getItemId() == R.id.nav_help) {
+            Intent intent = new Intent(this, HelpActivity.class);
+            startActivity(intent);
+        }
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -285,7 +348,7 @@ public class DashBoardActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mqtt.disconnect();
+        //mqtt.disconnect();
     }
 
     @Override

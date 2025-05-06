@@ -1,14 +1,21 @@
 package com.example.waterpumpcontrol;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -24,6 +31,8 @@ public class LoginActivity extends AppCompatActivity {
     private static final String DB_URL = "jdbc:mysql://pvl.vn:3306/admin_db";
     private static final String DB_USER = "raspberry";
     private static final String DB_PASSWORD = "admin6789@";
+
+    private WaterPumpManager waterPumpManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +57,48 @@ public class LoginActivity extends AppCompatActivity {
                 loginUser(username, password);
             }
         });
+
+        waterPumpManager = WaterPumpManager.getInstance();
+
+        waterPumpManager.checkPostNotificationPermission(this);
+        waterPumpManager.initMqtt(this);
+        waterPumpManager.createNotificationChannel(this);
+
+
+        Handler handler1 = new Handler();
+        Runnable checkMqttConnectionTask = new Runnable() {
+            @Override
+            public void run() {
+                // Gọi hàm checkMqttConnection mỗi 10 giây
+                waterPumpManager.checkMqttConnection(LoginActivity.this);
+
+                // Lặp lại sau 10 giây (10,000ms)
+                handler1.postDelayed(this, 10000); // Delay 10s
+            }
+        };
+
+        // Bắt đầu kiểm tra ngay lập tức khi ứng dụng chạy
+        handler1.post(checkMqttConnectionTask);
+
+        CardView cardView = findViewById(R.id.cardView);
+
+        cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                View currentFocus = getCurrentFocus();
+                if (currentFocus != null) {
+                    // Ẩn bàn phím
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+
+                    currentFocus.clearFocus();
+                }
+            }
+        });
+
     }
+
+
 
     private void loginUser(String username, String password) {
         new Thread(() -> {

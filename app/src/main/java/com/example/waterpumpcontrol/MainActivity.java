@@ -75,6 +75,10 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
+        else if (item.getItemId() == R.id.nav_help) {
+            Intent intent = new Intent(this, HelpActivity.class);
+            startActivity(intent);
+        }
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;

@@ -9,7 +9,7 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 /**
- * MqttHandler encapsulates MQTT connect, subscribe, publish and disconnect using Paho MqttClient.
+ * MqttHandler encapsulates MQTT connect, subscribe, publish, disconnect, and additional functions.
  */
 public class MqttHandler {
     private MqttClient mqttClient;
@@ -37,6 +37,18 @@ public class MqttHandler {
     }
 
     /**
+     * Reconnect to MQTT broker.
+     */
+    public void reconnect() {
+        if (mqttClient == null || mqttClient.isConnected()) return;
+        try {
+            mqttClient.reconnect();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Subscribe to a topic at QoS 0.
      * @param topic MQTT topic to subscribe.
      */
@@ -53,6 +65,19 @@ public class MqttHandler {
         if (mqttClient == null || !mqttClient.isConnected()) return;
         try {
             mqttClient.subscribe(topic, qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Unsubscribe from a topic.
+     * @param topic MQTT topic to unsubscribe.
+     */
+    public void unsubscribe(String topic) {
+        if (mqttClient == null || !mqttClient.isConnected()) return;
+        try {
+            mqttClient.unsubscribe(topic);
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -99,6 +124,14 @@ public class MqttHandler {
     }
 
     /**
+     * Check if the client is currently connected.
+     * @return True if connected, false otherwise.
+     */
+    public boolean isConnected() {
+        return mqttClient != null && mqttClient.isConnected();
+    }
+
+    /**
      * Set callback to handle connection, incoming messages, delivery completion, etc.
      * @param callback Implementation of MqttCallback.
      */
@@ -106,4 +139,5 @@ public class MqttHandler {
         if (mqttClient == null) return;
         mqttClient.setCallback(callback);
     }
+
 }

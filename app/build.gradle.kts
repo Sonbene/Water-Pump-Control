@@ -49,4 +49,6 @@ dependencies {
     implementation("org.eclipse.paho:org.eclipse.paho.android.service:1.1.1")
     implementation(libs.mysql)
 
+    implementation("com.google.firebase:firebase-messaging:20.3.0")
+
 }

@@ -1,11 +1,24 @@
 package com.example.waterpumpcontrol;
 
+import android.annotation.SuppressLint;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.WallpaperManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,6 +27,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -35,6 +52,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import android.Manifest;
+
+
 public class controlActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -54,6 +74,8 @@ public class controlActivity extends AppCompatActivity
     private LineData lineData;
     private int timeIndex = 0;
 
+    DrawerLayout drawer_layout;
+
     // MQTT
     private MqttHandler mqtt;
     private static final String BROKER    = "ssl://d3fd0fd59ed14b6d9fe037c0ef1bf662.s1.eu.hivemq.cloud:8883";
@@ -67,10 +89,18 @@ public class controlActivity extends AppCompatActivity
 
     private long lastMsgTime;
     private Handler handler = new Handler();
+
+    private Handler UpdateUI_Handler = new Handler();
+
     private Runnable connectionChecker;
 
     private float lastLevel = 0f;
     private int   lastPwm   = 0;
+
+    private int timeCheckWaterLevel = 5000;
+    private int timeDelayCheckWaterLevel = 0;
+
+    private WaterPumpManager waterPumpManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,11 +110,70 @@ public class controlActivity extends AppCompatActivity
         bindViews();
         setupDrawer();
         initChart();
-        initMqtt();
+        //initMqtt();
         setupControls();
         startConnectionChecker();
         showLastValues();
+
+        waterPumpManager = WaterPumpManager.getInstance();
+
+        waterPumpManager.checkPostNotificationPermission(this);
+        waterPumpManager.initMqtt(this);
+        waterPumpManager.createNotificationChannel(this);
+
+
+        Handler handler1 = new Handler();
+        Runnable checkMqttConnectionTask = new Runnable() {
+            @Override
+            public void run() {
+                // Gọi hàm checkMqttConnection mỗi 10 giây
+                waterPumpManager.checkMqttConnection(controlActivity.this);
+
+                // Lặp lại sau 10 giây (10,000ms)
+                handler1.postDelayed(this, 10000); // Delay 10s
+            }
+        };
+
+        // Bắt đầu kiểm tra ngay lập tức khi ứng dụng chạy
+        handler1.post(checkMqttConnectionTask);
+        startUpdatingUi();
+        unFocus();
+
     }
+    private void startUpdatingUi() {
+        // Định nghĩa Runnable sẽ gọi updateUi mỗi 1 giây
+        Runnable updateRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // Cập nhật UI
+                updateUi(waterPumpManager.getWaterLevel(), waterPumpManager.getWaterPWM());
+                // Lập lại Runnable để chạy sau 1 giây nữa
+                UpdateUI_Handler.postDelayed(this, 500);
+            }
+        };
+
+        // Bắt đầu thực thi runnable ngay lập tức
+        UpdateUI_Handler.post(updateRunnable);
+    }
+
+    private void unFocus()
+    {
+        drawer_layout.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                // Kiểm tra xem có EditText nào đang được focus không
+                View currentFocus = getCurrentFocus();
+                if (currentFocus != null) {
+                    // Ẩn bàn phím
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+                    // Bỏ focus khỏi trường hiện tại
+                    currentFocus.clearFocus();
+                }
+            }
+            return false;
+        });
+    }
+
 
     private void bindViews() {
         toolbar            = findViewById(R.id.toolbar);
@@ -101,6 +190,7 @@ public class controlActivity extends AppCompatActivity
         tvPumpStatus       = findViewById(R.id.tvPumpStatus);
         switchManual       = findViewById(R.id.switchManual);
         switchAuto         = findViewById(R.id.switchAuto);
+        drawer_layout = findViewById(R.id.drawer_layout);
     }
 
     private void setupDrawer() {
@@ -112,7 +202,7 @@ public class controlActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         toggle.setToolbarNavigationClickListener(v -> {
             String s = etThreshold.getText().toString().trim();
-            if (!s.isEmpty()) mqtt.publish(TOPIC_THRESHOLD, s);
+            if (!s.isEmpty()) waterPumpManager.MQTT_Publish(TOPIC_THRESHOLD, s);
             drawerLayout.openDrawer(GravityCompat.START);
         });
     }
@@ -120,6 +210,9 @@ public class controlActivity extends AppCompatActivity
     private void initChart() {
         dataSetLevel   = new LineDataSet(new ArrayList<>(), "Mực nước (cm)");
         dataSetControl = new LineDataSet(new ArrayList<>(), "DutyCycle (%)");
+
+        dataSetLevel.setColor(Color.BLUE);
+        dataSetControl.setColor(Color.RED);
 
         ValueFormatter lastPointFormatterLevel = new ValueFormatter() {
             @Override
@@ -147,12 +240,12 @@ public class controlActivity extends AppCompatActivity
         dataSetControl.setValueFormatter(lastPointFormatterControl);
 
         dataSetLevel.setColor(Color.BLUE);
-        dataSetLevel.setValueTextColor(Color.MAGENTA);
+        dataSetLevel.setValueTextColor(Color.BLUE);
         dataSetLevel.setValueTextSize(10f);
         dataSetLevel.setDrawCircles(true);
 
         dataSetControl.setColor(Color.RED);
-        dataSetControl.setValueTextColor(Color.WHITE);
+        dataSetControl.setValueTextColor(Color.RED);
         dataSetControl.setValueTextSize(10f);
         dataSetControl.setDrawCircles(true);
 
@@ -214,7 +307,7 @@ public class controlActivity extends AppCompatActivity
         switchManual.setEnabled(!switchAuto.isChecked());
         btnApplyThreshold.setOnClickListener(v -> {
             String s = etThreshold.getText().toString().trim();
-            if (!s.isEmpty()) mqtt.publish(TOPIC_THRESHOLD, s);
+            if (!s.isEmpty()) waterPumpManager.MQTT_Publish(TOPIC_THRESHOLD, s);
             if(s.isEmpty()) {
                 Toast.makeText(this, "Hãy nhập mức nước trước", Toast.LENGTH_SHORT).show();
             } else{
@@ -224,7 +317,7 @@ public class controlActivity extends AppCompatActivity
         });
         btnApplyPumpSpeed.setOnClickListener(v -> {
             String s = etPumpSpeed.getText().toString().trim();
-            if (!s.isEmpty()) mqtt.publish(TOPIC_PUMPSPEED, s);
+            if (!s.isEmpty()) waterPumpManager.MQTT_Publish(TOPIC_PUMPSPEED, s);
 
             if(s == "") {
                 Toast.makeText(this, "Hãy nhập tốc độ bơm trước", Toast.LENGTH_SHORT).show();
@@ -234,7 +327,7 @@ public class controlActivity extends AppCompatActivity
 
         });
         switchAuto.setOnCheckedChangeListener((b,on) -> {
-            mqtt.publish(TOPIC_AUTO, on?"1":"0");
+            waterPumpManager.MQTT_Publish(TOPIC_AUTO, on?"1":"0");
             switchManual.setEnabled(!on);
             btnApplyPumpSpeed.setEnabled(!on);
             etPumpSpeed.setEnabled(!on);
@@ -242,7 +335,7 @@ public class controlActivity extends AppCompatActivity
             Toast.makeText(this, "Chế độ tự động: " + (on?"Bật":"Tắt"), Toast.LENGTH_SHORT).show();
         });
         switchManual.setOnCheckedChangeListener((b,on) -> {
-            mqtt.publish(TOPIC_CONTROL, on?"1":"0");
+            waterPumpManager.MQTT_Publish(TOPIC_CONTROL, on?"1":"0");
             Toast.makeText(this, "Bơm " + (on?"Bật":"Tắt"), Toast.LENGTH_SHORT).show();
         });
     }
@@ -304,6 +397,10 @@ public class controlActivity extends AppCompatActivity
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
+        else if (item.getItemId() == R.id.nav_help) {
+            Intent intent = new Intent(this, HelpActivity.class);
+            startActivity(intent);
+        }
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -311,7 +408,9 @@ public class controlActivity extends AppCompatActivity
     @Override protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacks(connectionChecker);
+        handler.removeCallbacksAndMessages(null); // Dừng tất cả các callback
         mqtt.disconnect();
+        UpdateUI_Handler.removeCallbacksAndMessages(null);
     }
 
     @Override public void onBackPressed() {

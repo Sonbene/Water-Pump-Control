@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -55,6 +56,7 @@ public class ReportsActivity extends AppCompatActivity
 
     private final ExecutorService dbExecutor = Executors.newSingleThreadExecutor();
 
+    private WaterPumpManager waterPumpManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +103,28 @@ public class ReportsActivity extends AppCompatActivity
 
         // Generate report button
         btnGenerateReport.setOnClickListener(v -> generateReport());
+
+        waterPumpManager = WaterPumpManager.getInstance();
+
+        waterPumpManager.checkPostNotificationPermission(this);
+        waterPumpManager.initMqtt(this);
+        waterPumpManager.createNotificationChannel(this);
+
+
+        Handler handler1 = new Handler();
+        Runnable checkMqttConnectionTask = new Runnable() {
+            @Override
+            public void run() {
+                // Gọi hàm checkMqttConnection mỗi 10 giây
+                waterPumpManager.checkMqttConnection(ReportsActivity.this);
+
+                // Lặp lại sau 10 giây (10,000ms)
+                handler1.postDelayed(this, 10000); // Delay 10s
+            }
+        };
+
+        // Bắt đầu kiểm tra ngay lập tức khi ứng dụng chạy
+        handler1.post(checkMqttConnectionTask);
     }
 
     private void showDatePicker(Calendar cal, OnDateSelectedListener listener) {
@@ -208,8 +232,11 @@ public class ReportsActivity extends AppCompatActivity
         LineDataSet alertDataSet = new LineDataSet(alertEntries, "Cảnh báo");
 
         volumeDataSet.setColor(Color.RED);
+        volumeDataSet.setValueTextColor(Color.RED);
         pumpTimeDataSet.setColor(Color.GREEN);
+        pumpTimeDataSet.setValueTextColor(Color.GREEN);
         alertDataSet.setColor(Color.BLUE);
+        alertDataSet.setValueTextColor(Color.BLUE);
 
         LineData lineData = new LineData(volumeDataSet, pumpTimeDataSet, alertDataSet);
         chartReportData.setData(lineData);
@@ -246,6 +273,9 @@ public class ReportsActivity extends AppCompatActivity
             startActivity(intent);
         } else if (item.getItemId() == R.id.nav_logout) {
             intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        } else if (item.getItemId() == R.id.nav_help) {
+            intent = new Intent(this, HelpActivity.class);
             startActivity(intent);
         }
         if (intent != null) {

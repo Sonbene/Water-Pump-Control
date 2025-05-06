@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Nội dung chính: CoordinatorLayout để hỗ trợ AppBarLayout -->
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- AppBarLayout chứa Toolbar có thể cuộn -->
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@drawable/toolbar_background"
+                app:navigationIcon="@drawable/ic_menu"
+                app:title="Trợ giúp"
+                app:titleTextColor="@android:color/white"
+                android:elevation="4dp"
+                app:layout_scrollFlags="scroll|enterAlways" />
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <!-- Nội dung trợ giúp có thể cuộn -->
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Tiêu đề hướng dẫn -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Hướng dẫn sử dụng hệ thống"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:paddingBottom="8dp"/>
+
+                <!-- Câu hỏi 1 -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="1. Kết nối hệ thống bơm với các thiết bị và mạng."
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Để kết nối hệ thống bơm, bạn cần đảm bảo các thiết bị đã kết nối với mạng Wi-Fi hoặc LAN, cấu hình đúng SSID và mật khẩu."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Câu hỏi 2 -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="2. Cấu hình ngưỡng và tốc độ bơm mặc định."
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Vào Cài đặt → Ngưỡng &amp; Tốc độ mặc định, nhập giá trị mong muốn và nhấn 'Áp dụng'.\n "
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="3. Sự khác biệt giữa chế độ thủ công và tự động là gì?"
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Ở chế độ thủ công, bạn bật/tắt bơm bằng công tắc “Điều khiển bơm”. Ở chế độ tự động, hệ thống sẽ chạy theo ngưỡng đã đặt mà không cần can thiệp."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion4"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingBottom="8dp"
+                            android:textStyle="bold"
+                            android:text="4. Làm sao để đọc biểu đồ lịch sử mực nước?"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/tvAnswer4"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Trục ngang là thời gian, trục đứng vừa là mực nước (cm) vừa là tỉ lệ của tốc độ bơm so với tốc độ tối đa. Nhãn số tại điểm cuối biểu đồ là giá trị cập nhật mới nhất."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion5"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="5. Khi nào hệ thống gửi cảnh báo và làm sao xem?"
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer5"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Hệ thống cảnh báo khi mực nước vượt ngưỡng cao/thấp hoặc không có dữ liệu trong 1 khoảng. Xem danh sách cảnh báo ở màn “Cảnh báo”."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion6"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion6"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="6. Phải làm gì khi bơm hoạt động liên tục mà không ngắt?"
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer6"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="  Kiểm tra lại ngưỡng cao/thấp thiết lập trong “Cài đặt”. Nếu vẫn còn lỗi, tắt chế độ Auto và thử chạy Manual để xác định nguyên nhân."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion7"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion7"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="7. App có hoạt động ngoại tuyến được không?"
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer7"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="  Ứng dụng cần mạng để lấy dữ liệu MQTT. Nếu mất mạng, vẫn xem được dữ liệu cũ đã lưu trong cache, nhưng không thể cập nhật mới cho đến khi kết nối lại."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion8"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion8"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="8. App lưu trữ dữ liệu ở đâu, có lo ngại riêng tư không?"
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer8"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=" Dữ liệu tạm lưu trên thiết bị di động (cache) và/hoặc server MQTT tuỳ cấu hình; không thu thập thông tin cá nhân, toàn bộ payload chỉ là số liệu mực nước và trạng thái."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion9"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion9"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="9. Làm sao kiểm tra xem cảm biến nước còn hoạt động tốt?"
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer9"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Khi app hiển thị mực nước thay đổi khi bạn thay đổi mực thực tế; nếu luôn cố định hoặc báo lỗi, bạn nên kiểm tra dây nối và nguồn cho cảm biến."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion10"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion10"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="10. Có thể tích hợp với hệ thống SmartHome khác không?"
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer10"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=" Có, bạn chỉ cần kết nối broker chung và subscribe topic từ app; hệ thống SmartHome như Home Assistant hoặc Node-RED đều hỗ trợ MQTT rất tốt."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion11"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion11"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="11. Làm sao để bảo trì và vệ sinh hệ thống bơm?"
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer11"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=" Định kỳ 3–6 tháng nên tắt nguồn, tháo bộ lọc, rửa sạch cặn bẩn và kiểm tra gioăng, ống mềm; bôi trơn trục bơm theo khuyến nghị của nhà sản xuất."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardQuestion12"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:cardCornerRadius="8dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:onClick="toggleAnswer">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:id="@+id/tvQuestion12"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="12. Gặp sự cố hoặc cần hỗ trợ kỹ thuật thì liên hệ ai?"
+                            android:textSize="16sp"
+                            android:paddingBottom="8dp"/>
+
+                        <TextView
+                            android:id="@+id/tvAnswer12"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Gửi mail tới waterpumpcontrolhelp1234@gmail.com hoặc gọi hotline 1900-1234. Bạn cũng có thể hỏi trực tiếp NAS để giải đáp thắc mắc."
+                            android:textSize="14sp"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+                <!-- Thêm các mục khác tương tự -->
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <!-- Navigation Drawer -->
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/navigation_menu"/>
+</androidx.drawerlayout.widget.DrawerLayout>

@@ -6,9 +6,12 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.text.InputType;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -30,9 +33,12 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.Locale;
 
+
+
 public class SettingsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private WaterPumpManager waterPumpManager;
     private DrawerLayout drawer;
     private NavigationView navigationView;
     private ActionBarDrawerToggle toggle;
@@ -111,7 +117,52 @@ public class SettingsActivity extends AppCompatActivity
 
         // Register listeners
         initListeners();
+
+        waterPumpManager = WaterPumpManager.getInstance();
+
+        waterPumpManager.checkPostNotificationPermission(this);
+        waterPumpManager.initMqtt(this);
+        waterPumpManager.createNotificationChannel(this);
+
+
+        Handler handler1 = new Handler();
+        Runnable checkMqttConnectionTask = new Runnable() {
+            @Override
+            public void run() {
+                // Gọi hàm checkMqttConnection mỗi 10 giây
+                waterPumpManager.checkMqttConnection(SettingsActivity.this);
+
+                // Lặp lại sau 10 giây (10,000ms)
+                handler1.postDelayed(this, 10000); // Delay 10s
+            }
+        };
+
+        // Bắt đầu kiểm tra ngay lập tức khi ứng dụng chạy
+        handler1.post(checkMqttConnectionTask);
+
+        unFocus();
     }
+
+    private void unFocus() {
+        // Lấy DrawerLayout
+        drawer.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                // Kiểm tra xem có EditText nào đang được focus không
+                View currentFocus = getCurrentFocus();
+                if (currentFocus != null) {
+                    // Ẩn bàn phím
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+                    }
+                    // Bỏ focus khỏi trường hiện tại
+                    currentFocus.clearFocus();
+                }
+            }
+            return false; // Trả về false để tiếp tục xử lý sự kiện
+        });
+    }
+
 
     @Override
     protected void onPause() {
@@ -127,8 +178,6 @@ public class SettingsActivity extends AppCompatActivity
 
     private void loadPreferences() {
         etTestDuration.setText(String.valueOf(prefs.getInt("test_duration", 5)));
-        etDefaultThreshold.setText(String.valueOf(prefs.getInt("default_threshold", 80)));
-        etDefaultSpeed.setText(String.valueOf(prefs.getInt("default_speed", 50)));
         switchSound.setChecked(prefs.getBoolean("alert_sound", true));
         switchVibrate.setChecked(prefs.getBoolean("alert_vibrate", true));
         spinnerNotifyChannel.setSelection(prefs.getInt("notify_channel_index", 0));
@@ -190,6 +239,7 @@ public class SettingsActivity extends AppCompatActivity
         testTimer = new CountDownTimer(sec * 1000L, 1000) {
             @Override public void onTick(long left) {
                 btnStartTest.setText("Chạy thử (" + (left/1000) + "s)");
+                waterPumpManager.MQTT_Publish(WaterPumpManager.getTopicPumpSpeed(), etDefaultThreshold.getText().toString());
             }
             @Override public void onFinish() { stopTestPump(); }
         }.start();
@@ -200,6 +250,7 @@ public class SettingsActivity extends AppCompatActivity
         btnStartTest.setEnabled(true);
         btnStopTest.setEnabled(false);
         btnStartTest.setText("Chạy thử");
+        waterPumpManager.MQTT_Publish(WaterPumpManager.getTopicPumpSpeed(), "0");
     }
 
     private void restoreDefaults() {
@@ -320,9 +371,12 @@ public class SettingsActivity extends AppCompatActivity
         else if (id == R.id.nav_alerts) intent = new Intent(this, AlertsActivity.class);
         else if (id == R.id.nav_reports) intent = new Intent(this, ReportsActivity.class);
         else if (id == R.id.nav_settings) return true;
-        else if (id == R.id.nav_logout) { performLogout(); return true; }
         else if (item.getItemId() == R.id.nav_logout) {
             intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+        }
+        else if (item.getItemId() == R.id.nav_help) {
+            intent = new Intent(this, HelpActivity.class);
             startActivity(intent);
         }
         if (intent != null) { startActivity(intent); finish(); }
