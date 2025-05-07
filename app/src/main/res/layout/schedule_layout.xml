@@ -27,6 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
+            android:fillViewport="true"
             android:padding="16dp">
 
             <LinearLayout
@@ -166,9 +167,9 @@
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/rvSchedules"
                             android:layout_width="match_parent"
-                            android:layout_height="306dp"
+                            android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:nestedScrollingEnabled="true" />
+                            android:nestedScrollingEnabled="false" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 

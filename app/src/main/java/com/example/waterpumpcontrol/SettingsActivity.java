@@ -15,6 +15,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -25,6 +26,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -43,9 +45,11 @@ public class SettingsActivity extends AppCompatActivity
     private NavigationView navigationView;
     private ActionBarDrawerToggle toggle;
 
+    private CoordinatorLayout coordinator_layout;
+
     private EditText etTestDuration, etDefaultThreshold, etDefaultSpeed;
     private Button btnStartTest, btnStopTest, btnRestoreDefaults, btnChangePin, btnLogout;
-    private Switch switchSound, switchVibrate, switchAutoReport;
+    private Switch switchnotification, switchbell, switchAutoReport;
     private Spinner spinnerNotifyChannel, spinnerRetention, spinnerTheme, spinnerLanguage;
 
     private SharedPreferences prefs;
@@ -89,8 +93,8 @@ public class SettingsActivity extends AppCompatActivity
         etDefaultThreshold = findViewById(R.id.etDefaultThreshold);
         etDefaultSpeed     = findViewById(R.id.etDefaultSpeed);
         btnRestoreDefaults = findViewById(R.id.btnRestoreDefaults);
-        switchSound        = findViewById(R.id.switchSound);
-        switchVibrate      = findViewById(R.id.switchVibrate);
+        switchnotification        = findViewById(R.id.switchnotification);
+        switchbell      = findViewById(R.id.switchbell);
         switchAutoReport   = findViewById(R.id.switchAutoReport);
         spinnerNotifyChannel = findViewById(R.id.spinnerNotifyChannel);
         spinnerRetention     = findViewById(R.id.spinnerRetention);
@@ -98,6 +102,7 @@ public class SettingsActivity extends AppCompatActivity
         spinnerLanguage      = findViewById(R.id.spinnerLanguage);
         btnChangePin         = findViewById(R.id.btnChangePin);
         btnLogout            = findViewById(R.id.btnLogout);
+        coordinator_layout   = findViewById(R.id.coordinator_layout);
 
         // Setup adapters
         spinnerNotifyChannel.setAdapter(ArrayAdapter.createFromResource(
@@ -145,7 +150,7 @@ public class SettingsActivity extends AppCompatActivity
 
     private void unFocus() {
         // Lấy DrawerLayout
-        drawer.setOnTouchListener((v, event) -> {
+        coordinator_layout.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 // Kiểm tra xem có EditText nào đang được focus không
                 View currentFocus = getCurrentFocus();
@@ -178,8 +183,8 @@ public class SettingsActivity extends AppCompatActivity
 
     private void loadPreferences() {
         etTestDuration.setText(String.valueOf(prefs.getInt("test_duration", 5)));
-        switchSound.setChecked(prefs.getBoolean("alert_sound", true));
-        switchVibrate.setChecked(prefs.getBoolean("alert_vibrate", true));
+        switchnotification.setChecked(prefs.getBoolean("alert_sound", true));
+        switchbell.setChecked(prefs.getBoolean("alert_vibrate", true));
         spinnerNotifyChannel.setSelection(prefs.getInt("notify_channel_index", 0));
         spinnerRetention.setSelection(prefs.getInt("retention_index", 2));
         switchAutoReport.setChecked(prefs.getBoolean("auto_report", false));
@@ -192,8 +197,8 @@ public class SettingsActivity extends AppCompatActivity
         btnStopTest.setOnClickListener(v -> stopTestPump());
         btnRestoreDefaults.setOnClickListener(v -> restoreDefaults());
 
-        switchSound.setOnCheckedChangeListener((b, c) -> prefs.edit().putBoolean("alert_sound", c).apply());
-        switchVibrate.setOnCheckedChangeListener((b, c) -> prefs.edit().putBoolean("alert_vibrate", c).apply());
+        switchnotification.setOnCheckedChangeListener((b, c) -> prefs.edit().putBoolean("alert_sound", c).apply());
+        switchbell.setOnCheckedChangeListener((b, c) -> prefs.edit().putBoolean("alert_vibrate", c).apply());
         switchAutoReport.setOnCheckedChangeListener((b, c) -> prefs.edit().putBoolean("auto_report", c).apply());
 
         spinnerNotifyChannel.setOnItemSelectedListener(new SimpleItemSelectedListener(pos ->
@@ -225,6 +230,34 @@ public class SettingsActivity extends AppCompatActivity
 
         btnChangePin.setOnClickListener(v -> showChangePinDialog());
         btnLogout.setOnClickListener(v -> performLogout());
+
+        // 1) Event khi bật/tắt Thông báo chung
+        switchnotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // Bật/tắt tính năng notification
+                WaterPumpManager.getInstance().setAlarmEnabled(isChecked);
+                Toast.makeText(
+                        SettingsActivity.this,
+                        isChecked ? "Thông báo đã bật" : "Thông báo đã tắt",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
+
+        // 2) Event khi bật/tắt Chuông
+        switchbell.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // isChecked = true → user muốn có chuông → vibration-only = false
+                WaterPumpManager.getInstance().setVibrationEnabled(isChecked);
+                Toast.makeText(
+                        SettingsActivity.this,
+                        isChecked ? "Chuông đã bật" : "Chuông đã tắt, chỉ rung",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
     }
 
     private void startTestPump() {
@@ -271,14 +304,15 @@ public class SettingsActivity extends AppCompatActivity
         editor.putInt("default_threshold", thr.isEmpty()?80:Integer.parseInt(thr));
         String spd = etDefaultSpeed.getText().toString();
         editor.putInt("default_speed", spd.isEmpty()?50:Integer.parseInt(spd));
-        editor.putBoolean("alert_sound", switchSound.isChecked());
-        editor.putBoolean("alert_vibrate", switchVibrate.isChecked());
+        editor.putBoolean("alert_sound", switchnotification.isChecked());
+        editor.putBoolean("alert_vibrate", switchbell.isChecked());
         editor.putInt("notify_channel_index", spinnerNotifyChannel.getSelectedItemPosition());
         editor.putInt("retention_index", spinnerRetention.getSelectedItemPosition());
         editor.putBoolean("auto_report", switchAutoReport.isChecked());
         editor.putInt("theme_index", spinnerTheme.getSelectedItemPosition());
         editor.putInt("language_index", spinnerLanguage.getSelectedItemPosition());
         editor.apply();
+
     }
 
     private void applyTheme(int index) {

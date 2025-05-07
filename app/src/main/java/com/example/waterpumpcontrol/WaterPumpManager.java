@@ -45,7 +45,7 @@ public class WaterPumpManager {
 
     private int waterPWM = 0;
     private boolean isAlarmEnabled = true;
-    private boolean isVibrationEnabled = false;
+    private boolean isVibrationEnabled = true;
     private float threshold = 20.0f; // Example threshold for water level
 
     private static final String DB_URL      = "jdbc:mysql://pvl.vn:3306/admin_db";
@@ -63,8 +63,14 @@ public class WaterPumpManager {
     private static final String TOPIC_AUTO = "auto";
     private static final String TOPIC_PUMPSPEED = "pumpspeed";
 
+    // ở đầu class, cùng chỗ bạn khai báo TOPIC_…
+    private static final String CHANNEL_ID_SOUND     = "WaterPumpChannelWithSound";
+    private static final String CHANNEL_ID_VIBRATE   = "WaterPumpChannelVibrateOnly";
+
+
+
     private long lastMqttMessageTime = 0; // Thời gian nhận thông điệp MQTT cuối cùng
-    private boolean isMqttDisconnected = false; // Kiểm tra trạng thái MQTT (có bị mất kết nối không)
+    private boolean isMqttDisconnected = true; // Kiểm tra trạng thái MQTT (có bị mất kết nối không)
 
     private boolean firstTimeReceiveFromMQTT = true;
 
@@ -231,43 +237,76 @@ public class WaterPumpManager {
     }
 
     // Method to send notification
+//    @SuppressLint("MissingPermission")
+//    public void sendNotification(Context context, String title, String message) {
+//        try {
+//            //Context context = App.getAppContext(); // Use global context
+//            if (context == null) {
+//                Log.e("NotificationError", "Context is null, cannot send notification.");
+//                return;
+//            }
+//
+//            // Create an Intent to open the activity when the notification is clicked
+//            Intent intent = new Intent(context, LoginActivity.class);
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//
+//            // Create PendingIntent from the Intent
+//            PendingIntent pendingIntent = PendingIntent.getActivity(
+//                    context,
+//                    0,
+//                    intent,
+//                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+//
+//            // Create notification
+//            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "WaterPumpChannel")
+//                    .setSmallIcon(R.drawable.ic_alert)
+//                    .setContentTitle(title)
+//                    .setContentText(message)
+//                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+//                    .setAutoCancel(true)
+//                    .setContentIntent(pendingIntent);
+//
+//            // Send notification
+//            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+//            notificationManager.notify(1, builder.build());
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.e("NotificationError", "Error sending notification: " + e.getMessage());
+//        }
+//    }
+
     @SuppressLint("MissingPermission")
     public void sendNotification(Context context, String title, String message) {
-        try {
-            //Context context = App.getAppContext(); // Use global context
-            if (context == null) {
-                Log.e("NotificationError", "Context is null, cannot send notification.");
-                return;
-            }
+        if(isAlarmEnabled()) {
+            if (context == null) return;
+            createNotificationChannel(context);
 
-            // Create an Intent to open the activity when the notification is clicked
-            Intent intent = new Intent(context, LoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            // Create PendingIntent from the Intent
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                    context,
-                    0,
-                    intent,
+            Intent intent = new Intent(context, LoginActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            PendingIntent pi = PendingIntent.getActivity(
+                    context, 0, intent,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-            // Create notification
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "WaterPumpChannel")
+            // Nếu isVibrationEnabled = true → chọn channel chỉ rung
+            String channelId = isVibrationEnabled()
+                    ? CHANNEL_ID_SOUND
+                    : CHANNEL_ID_VIBRATE;
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
                     .setSmallIcon(R.drawable.ic_alert)
                     .setContentTitle(title)
                     .setContentText(message)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setAutoCancel(true)
-                    .setContentIntent(pendingIntent);
+                    .setContentIntent(pi);
 
-            // Send notification
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-            notificationManager.notify(1, builder.build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e("NotificationError", "Error sending notification: " + e.getMessage());
+            NotificationManagerCompat.from(context)
+                    .notify(1, builder.build());
         }
     }
+
+
 
 
 
@@ -306,18 +345,49 @@ public class WaterPumpManager {
     }
 
     // Method to create notification channel (for Android Oreo and above)
-    public void createNotificationChannel(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "WaterPump Alerts";
-            String description = "Channel for water pump alerts";
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel channel = new NotificationChannel("WaterPumpChannel", name, importance);
-            channel.setDescription(description);
+//    public void createNotificationChannel(Context context) {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            CharSequence name = "WaterPump Alerts";
+//            String description = "Channel for water pump alerts";
+//            int importance = NotificationManager.IMPORTANCE_HIGH;
+//            NotificationChannel channel = new NotificationChannel("WaterPumpChannel", name, importance);
+//            channel.setDescription(description);
+//
+//            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+//            notificationManager.createNotificationChannel(channel);
+//        }
+//    }
 
-            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+    public void createNotificationChannel(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        NotificationManager mgr = context.getSystemService(NotificationManager.class);
+
+        // 1) Channel có âm thanh + rung
+        NotificationChannel chSound = new NotificationChannel(
+                CHANNEL_ID_SOUND,
+                "Water Pump Alerts (Sound)",
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        chSound.setDescription("Alerts with sound and vibration");
+        chSound.enableVibration(true);
+
+        // 2) Channel chỉ rung, không có âm thanh
+        NotificationChannel chVibrate = new NotificationChannel(
+                CHANNEL_ID_VIBRATE,
+                "Water Pump Alerts (Vibrate Only)",
+                NotificationManager.IMPORTANCE_HIGH
+        );
+        chVibrate.setDescription("Alerts with vibration only");
+        chVibrate.setSound(null, null);
+        chVibrate.enableVibration(true);
+        // (tùy chọn) bạn có thể set pattern:
+        // chVibrate.setVibrationPattern(new long[]{0, 500, 200, 500});
+
+        mgr.createNotificationChannel(chSound);
+        mgr.createNotificationChannel(chVibrate);
     }
+
+
 
     // Method to handle MQTT message and update water level and PWM
     public void handleMqttMessage(Context context, String topic, MqttMessage message) {
@@ -361,7 +431,7 @@ public class WaterPumpManager {
                         float x = Float.parseFloat(p[0].replace(',','.'));
                         int   y = Integer.parseInt(p[1]);
                         waterLevel = x;
-                        waterPWM= y * 100 / 255;
+                        waterPWM= y ;
 
                         setWaterLevel(waterLevel);
                         setWaterPWM(waterPWM);

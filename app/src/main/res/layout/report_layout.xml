@@ -210,12 +210,17 @@
                             style="?attr/textAppearanceSubtitle1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="!!Không phải bơm nước, mà là bơm style! Chỉ cần một chạm, mọi thứ đều theo ý bạn!!😜💧" />
+                            android:text="!!Không phải bơm nước, mà là bơm style! \nChỉ cần một chạm, mọi thứ đều theo ý bạn!!💧" />
+                        <TextView
+                            style="?attr/textAppearanceSubtitle2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="                                                    --Nguyễn Anh Sơn--" />
 
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/rvReports"
                             android:layout_width="352dp"
-                            android:layout_height="138dp"
+                            android:layout_height="1dp"
                             android:layout_marginTop="8dp"
                             android:nestedScrollingEnabled="false" />
                     </LinearLayout>

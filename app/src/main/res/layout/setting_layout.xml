@@ -8,6 +8,7 @@
 
     <!-- Nội dung chính + AppBar -->
     <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/coordinator_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
@@ -154,17 +155,17 @@
                     android:paddingBottom="16dp">
 
                     <Switch
-                        android:id="@+id/switchSound"
+                        android:id="@+id/switchnotification"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Âm thanh" />
+                        android:text="Thông báo" />
 
                     <Switch
-                        android:id="@+id/switchVibrate"
+                        android:id="@+id/switchbell"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="16dp"
-                        android:text="Rung" />
+                        android:text="Chuông" />
                 </LinearLayout>
 
                 <TextView
