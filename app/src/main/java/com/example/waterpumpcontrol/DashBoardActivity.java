@@ -299,7 +299,7 @@ public class DashBoardActivity extends AppCompatActivity
             dataSetLevel.addEntry(new Entry(timeIndex, x));
             dataSetControl.addEntry(new Entry(timeIndex, y / 255f * 100f));
 
-            if (dataSetLevel.getEntryCount() > 20) {
+            if (dataSetLevel.getEntryCount() > 30) {
                 dataSetLevel.removeFirst();
                 dataSetControl.removeFirst();
             }

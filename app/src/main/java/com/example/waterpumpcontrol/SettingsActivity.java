@@ -272,7 +272,8 @@ public class SettingsActivity extends AppCompatActivity
         testTimer = new CountDownTimer(sec * 1000L, 1000) {
             @Override public void onTick(long left) {
                 btnStartTest.setText("Chạy thử (" + (left/1000) + "s)");
-                waterPumpManager.MQTT_Publish(WaterPumpManager.getTopicPumpSpeed(), etDefaultThreshold.getText().toString());
+                waterPumpManager.MQTT_Publish(WaterPumpManager.getTopicPumpSpeed(), etDefaultSpeed.getText().toString());
+                waterPumpManager.MQTT_Publish(WaterPumpManager.getTopicControl(), "1");
             }
             @Override public void onFinish() { stopTestPump(); }
         }.start();
@@ -284,6 +285,7 @@ public class SettingsActivity extends AppCompatActivity
         btnStopTest.setEnabled(false);
         btnStartTest.setText("Chạy thử");
         waterPumpManager.MQTT_Publish(WaterPumpManager.getTopicPumpSpeed(), "0");
+        waterPumpManager.MQTT_Publish(WaterPumpManager.getTopicControl(), "0");
     }
 
     private void restoreDefaults() {

@@ -6,6 +6,7 @@
         <item>Email</item>
         <item>SMS</item>
         <item>Zalo OA</item>
+        <item>Facebook</item>
         <item>Push Notification</item>
 
     </string-array>

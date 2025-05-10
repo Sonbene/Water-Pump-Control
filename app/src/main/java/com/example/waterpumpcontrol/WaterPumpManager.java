@@ -59,7 +59,7 @@ public class WaterPumpManager {
     private static final String PASS = "Son@1234";
     private static final String TOPIC_LEVEL = "level";
     private static final String TOPIC_CONTROL = "control";
-    private static final String TOPIC_THRESHOLD = "threshold";
+        private static final String TOPIC_THRESHOLD = "threshold";
     private static final String TOPIC_AUTO = "auto";
     private static final String TOPIC_PUMPSPEED = "pumpspeed";
 

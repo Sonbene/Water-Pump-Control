@@ -54,8 +54,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
                     android:gravity="center_vertical"
+                    android:orientation="horizontal"
                     android:paddingBottom="16dp">
 
                     <TextView
@@ -67,8 +67,8 @@
                         android:id="@+id/etTestDuration"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_marginStart="8dp"
+                        android:layout_weight="1"
                         android:hint="5"
                         android:inputType="number" />
                 </LinearLayout>
@@ -100,8 +100,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
                     android:gravity="center_vertical"
+                    android:orientation="horizontal"
                     android:paddingBottom="16dp">
 
                     <TextView
@@ -113,8 +113,8 @@
                         android:id="@+id/etDefaultThreshold"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_marginStart="8dp"
+                        android:layout_weight="1"
                         android:inputType="number" />
 
                     <TextView
@@ -127,8 +127,8 @@
                         android:id="@+id/etDefaultSpeed"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:layout_marginStart="8dp"
+                        android:layout_weight="1"
                         android:inputType="number" />
                 </LinearLayout>
 
@@ -178,8 +178,8 @@
                     android:id="@+id/spinnerNotifyChannel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/notify_channels"
-                    android:layout_marginBottom="24dp" />
+                    android:layout_marginBottom="24dp"
+                    android:entries="@array/notify_channels" />
 
                 <!-- 4. Dữ liệu & Báo cáo -->
                 <TextView
@@ -193,8 +193,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
                     android:gravity="center_vertical"
+                    android:orientation="horizontal"
                     android:paddingBottom="24dp">
 
                     <TextView
@@ -206,9 +206,9 @@
                         android:id="@+id/spinnerRetention"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:layout_weight="1"
-                        android:entries="@array/retention_options"
-                        android:layout_marginStart="8dp" />
+                        android:entries="@array/retention_options" />
 
                     <Switch
                         android:id="@+id/switchAutoReport"
@@ -231,15 +231,15 @@
                     android:id="@+id/spinnerTheme"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/theme_options"
-                    android:layout_marginBottom="16dp" />
+                    android:layout_marginBottom="16dp"
+                    android:entries="@array/theme_options" />
 
                 <Spinner
                     android:id="@+id/spinnerLanguage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:entries="@array/language_options"
-                    android:layout_marginBottom="24dp" />
+                    android:layout_marginBottom="24dp"
+                    android:entries="@array/language_options" />
 
                 <!-- 6. Bảo mật & Tài khoản -->
                 <TextView

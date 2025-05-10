@@ -363,7 +363,7 @@ public class controlActivity extends AppCompatActivity
 
         dataSetLevel.addEntry(new Entry(timeIndex,lvl));
         dataSetControl.addEntry(new Entry(timeIndex, pct));
-        if (dataSetLevel.getEntryCount()>20) {
+        if (dataSetLevel.getEntryCount()>30) {
             dataSetLevel.removeFirst();
             dataSetControl.removeFirst();
         }

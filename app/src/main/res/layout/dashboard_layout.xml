@@ -24,7 +24,7 @@
             android:elevation="4dp"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:navigationIcon="@drawable/ic_menu"
-            app:title="Bảng điều khiển"
+            app:title="Trang chủ"
             app:titleTextColor="@android:color/white" />
 
         <!-- Nội dung Dashboard có thể cuộn -->
